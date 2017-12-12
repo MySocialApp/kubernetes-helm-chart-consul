@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "kubernetes.name" . }}-scripts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kubernetes.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  run.sh: |-
+    #/bin/sh
+
+    for i in $(seq 0 $(({{ .Values.consulReplicaCount }} - 1))); do
+        while true; do
+            echo "Waiting for {{ template "kubernetes.name" . }}-${i}.{{ template "kubernetes.name" . }} to come up"
+            ping -W 1 -c 1 {{ template "kubernetes.name" . }}-${i}.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc > /dev/null && break
+            sleep 1s
+        done
+    done
+    PEERS=""
+    for i in $(seq 0 $(({{ .Values.consulReplicaCount }} - 1))); do
+        PEERS="${PEERS}${PEERS:+ } -retry-join $(ping -c 1 {{ template "kubernetes.name" . }}-${i}.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc | awk -F'[()]' '/PING/{print $2}')"
+    done
+    exec /bin/consul agent \
+      -ui \
+      -datacenter {{ template "kubernetes.name" . }} \
+      -data-dir=/consul/data \
+      -server \
+      -bootstrap-expect={{ .Values.consulReplicaCount }} \
+      -bind=0.0.0.0 \
+      -advertise=$(POD_IP) \
+      ${PEERS} \
+      -client=0.0.0.0

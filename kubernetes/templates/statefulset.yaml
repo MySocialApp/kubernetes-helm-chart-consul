@@ -1,0 +1,85 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: {{ template "kubernetes.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kubernetes.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  serviceName: {{ template "kubernetes.name" . }}
+  updateStrategy:
+    type: "RollingUpdate"
+  replicas: {{ .Values.consulReplicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "kubernetes.name" . }}
+    spec:
+      nodeSelector:
+        type: {{ .Values.consulNodeSelector }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - {{ template "kubernetes.name" . }}
+              topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 10
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: consul
+        image: consul:{{ .Values.consulImageVersion }}
+        command: ['/bin/sh', '-c', '/consul/scripts/run.sh' ]
+        ports:
+        - containerPort: 8500
+          name: ui-port
+        - containerPort: 8400
+          name: alt-port
+        - containerPort: 53
+          name: udp-port
+        - containerPort: 8443
+          name: https-port
+        - containerPort: 8080
+          name: http-port
+        - containerPort: 8301
+          name: serflan
+        - containerPort: 8302
+          name: serfwan
+        - containerPort: 8600
+          name: consuldns
+        - containerPort: 8300
+          name: server
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: ca-certificates
+          mountPath: /etc/ssl/certs
+        - name: {{ template "kubernetes.name" . }}-data
+          mountPath: /consul/data
+        - name: {{ template "kubernetes.name" . }}-scripts
+          mountPath: /consul/scripts
+      volumes:
+      - name: ca-certificates
+        hostPath:
+          path: /usr/share/ca-certificates/
+      - name: consul-data
+        hostPath:
+          path: /mnt/data/{{ .Release.Namespace }}/consul
+      - name: {{ template "kubernetes.name" . }}-scripts
+        configMap:
+          name: {{ template "kubernetes.name" . }}-scripts
+          defaultMode: 0775

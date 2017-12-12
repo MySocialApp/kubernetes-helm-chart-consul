@@ -1,0 +1,5 @@
+consulReplicaCount: 3
+consulMaxUnavailableNodes: 1
+consulNodeSelector: worker
+
+consulImageVersion: "1.0.1"
