@@ -19,7 +19,9 @@ spec:
         app: {{ template "kubernetes.name" . }}
     spec:
       nodeSelector:
-        type: {{ .Values.consulNodeSelector }}
+        {{- range $key, $val := .Values.consulNodeSelector }}
+        {{ $key }}: {{ $val | quote }}
+        {{- end}}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

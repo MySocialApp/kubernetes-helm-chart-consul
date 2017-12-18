@@ -1,5 +1,6 @@
 consulReplicaCount: 3
 consulMaxUnavailableNodes: 1
-consulNodeSelector: worker
+consulNodeSelector:
+  node-role.kubernetes.io/node: "true"
 
 consulImageVersion: "1.0.1"
