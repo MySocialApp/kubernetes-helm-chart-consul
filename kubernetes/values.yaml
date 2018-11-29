@@ -4,3 +4,5 @@ consulNodeSelector:
   node-role.kubernetes.io/node: "true"
 
 consulImageVersion: "1.0.7"
+
+consulResources: {}
