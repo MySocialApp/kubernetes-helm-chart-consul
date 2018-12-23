@@ -82,7 +82,7 @@ spec:
           path: /usr/share/ca-certificates/
       - name: consul-data
         hostPath:
-          path: /mnt/data/{{ .Release.Namespace }}/consul
+          path: {{ .Values.consulPathPrefix }}/{{ .Release.Namespace }}/consul
       - name: {{ template "kubernetes.name" . }}-scripts
         configMap:
           name: {{ template "kubernetes.name" . }}-scripts

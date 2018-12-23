@@ -30,6 +30,6 @@ data:
       -server \
       -bootstrap-expect={{ .Values.consulReplicaCount }} \
       -bind=0.0.0.0 \
-      -advertise=$(POD_IP) \
+      -advertise=$POD_IP \
       ${PEERS} \
       -client=0.0.0.0

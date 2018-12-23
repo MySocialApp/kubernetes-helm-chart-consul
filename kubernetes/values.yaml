@@ -3,6 +3,7 @@ consulMaxUnavailableNodes: 1
 consulNodeSelector:
   node-role.kubernetes.io/node: "true"
 
-consulImageVersion: "1.0.7"
+consulImageVersion: "1.4.0"
+consulPathPrefix: "/mnt/data"
 
 consulResources: {}
