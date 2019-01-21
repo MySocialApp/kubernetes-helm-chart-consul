@@ -1,4 +1,4 @@
-# Kubernetes Helm Chart for Consul
+# Kubernetes Helm Chart for Consul [![Build Status](https://travis-ci.org/MySocialApp/kubernetes-helm-chart-consul.svg?branch=master)](https://travis-ci.org/MySocialApp/kubernetes-helm-chart-consul)
 
 You can find here a helm chart we're using at [MySocialApp](https://mysocialapp.io) (iOS and Android social app builder - SaaS)
 
